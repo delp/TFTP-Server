@@ -29,22 +29,37 @@ struct Packet
 
 };
 
+void printPacket(Packet* p)
+{
+  if(p != 0)
+    {
+      cout << "Type: " << p->type << endl;
+      if(p->filename != 0)
+	{
+	  cout << p->filename << endl;
+	}
+      cout << "Filename_length: " << p->filename_length << endl;
+    }
+}
+
 void zeroOut(Packet* p)
 {
-  pack -> type = 0;
-  pack -> filename = 0;
-  pack -> filename_length = 0;
-  pack -> mode = 0;
-  pack -> mode_length = 0;
+  p -> type = 0;
+  p -> filename = 0;
+  p -> filename_length = 0;
   
-  pack -> block_num = 0;
-  pack -> data = 0;
-  pack -> data_length = 0;
+  p -> mode = 0;
+  p -> mode_length = 0;
   
-  pack -> errorcode[0] = 0;
-  pack -> errorcode[1] = 0;
-  pack -> errmsg = 0;
-  pack -> errmsg_length = 0;
+  p -> block_num[0] = 0;
+  p -> block_num[1] = 0;
+  p -> data = 0;
+  p -> data_length = 0;
+  
+  p -> errorcode[0] = 0;
+  p -> errorcode[1] = 0;
+  p -> errmsg = 0;
+  p -> errmsg_length = 0; 
 }
 
 void getFilename(char* data, int length, Packet* p)
@@ -59,18 +74,27 @@ void getFilename(char* data, int length, Packet* p)
   
   while(current_byte != (char) 0)
     {
+  
       bufferthing[walker-2] = data[walker];
       current_length++;
       walker++;
       current_byte = data[walker];
     }
+  
+  
   char fname[current_length];
   for(int i = 0; i < current_length; i++)
     {
       fname[i] = bufferthing[i];
+  
     }
-  p -> filename = fname;
+  
+  
+  p -> filename = fname;  
   p -> filename_length = current_length;
+
+  cout << "fname: " << fname << endl;
+  cout << "p->filename: " << p->filename << endl;
 }
 
 void getMode(char* data, int length, Packet* p)
@@ -95,7 +119,7 @@ void getMode(char* data, int length, Packet* p)
       current_byte = data[walker];
     }
 
-  char mode[current_length];
+  char modename[current_length];
   for(int i = 0; i < current_length; i++)
     {
       modename[i] = bufferthing[i];
@@ -140,13 +164,13 @@ void getData(char* data, int length, Packet* p)
   p -> data_length = (length - 4 );
 }
 
-void getErrorCode(Char* data, int length, Packet* p)
+void getErrorCode(char* data, int length, Packet* p)
 {
   p -> errorcode[0] = data[2];
   p -> errorcode[0] = data[3];
 }
 
-void getErrorMessage(Char* data, int length, Packet* p)
+void getErrorMessage(char* data, int length, Packet* p)
 {
   char msg[length - 4];
   for(int i = 4; i < (length - 1); i++)
@@ -161,7 +185,7 @@ Packet* parseTFTPPacket(char* data, int length)
 {
   
   //Make a new packet and initialize it to 0/null.
-  Packet* pack;
+  Packet* pack = new Packet();
   zeroOut(pack);
   
   //get opcode
@@ -180,9 +204,10 @@ Packet* parseTFTPPacket(char* data, int length)
      pack -> type == 2)
     {
       getFilename(data, length, pack);
-      getMode(data, length, pack);
+      cout << pack -> filename << endl;
+      //getMode(data, length, pack);
     }
- 
+  /*
   //if the packet is DATA
   if(pack -> type == 3)
     {
@@ -195,10 +220,15 @@ Packet* parseTFTPPacket(char* data, int length)
     {
       getBlockNum(data, length, pack);
     }
-
-  //if the packet is an ERROR
   
-  return 0;
+  //if the packet is an ERROR
+  if(pack -> type == 5)
+    {
+      getErrorCode(data, length, pack);
+      getErrorMessage(data, length, pack);
+    }
+  */
+  return pack;
 }
 
 #endif
