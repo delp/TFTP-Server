@@ -220,13 +220,8 @@ Packet* parseTFTPPacket(char* data, int length)
     {
       getBlockNum(data, length, pack);
     }
-  
+
   //if the packet is an ERROR
-  if(pack -> type == 5)
-    {
-      getErrorCode(data, length, pack);
-      getErrorMessage(data, length, pack);
-    }
   */
   return pack;
 }
