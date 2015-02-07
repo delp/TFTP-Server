@@ -14,6 +14,18 @@ int main()
 
   //size is 20
   thing = parseTFTPPacket(rrq, 20);
+  
+  
   printPacket(thing);
+
+
+
+  char* d = thing->errorcode;
+  cout << d << endl;
+  d[0] = 255;
+  d[1] = 234;
+  cout << d << endl;
+
+  
   return 0;
 }

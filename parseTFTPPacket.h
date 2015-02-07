@@ -33,33 +33,61 @@ void printPacket(Packet* p)
 {
   if(p != 0)
     {
-      cout << "Type: " << p->type << endl;
+      cout << "Type: "            << p->type            << endl;
       if(p->filename != 0)
 	{
-	  cout << p->filename << endl;
+	  cout << "Filename: "    << p->filename        << endl;
 	}
       cout << "Filename_length: " << p->filename_length << endl;
+      if(p->mode != 0)
+	{
+	  cout << "Mode: "        << p->mode            << endl;
+	}
+      cout << "Mode_length: "     << p-> mode_length    << endl;
+      cout << "Block_Num: "       << p->block_num       << endl;
+      if(p->data != 0)
+	{
+	  cout << "Data: "        << p->data            << endl;
+	}
+      cout << "Data_length: "     << p->data_length     << endl;
+      cout << "Errorcode: "       << p->errorcode       << endl;
+      if(p->errmsg != 0)
+	{
+	  cout << "ErrMessage: "  << p->errmsg          << endl;
+	}
+      cout << "ErrMsg_Length: "   << p->errmsg_length   << endl;
+      
+      
+    }
+  else
+    {
+      cout << "Null packet. Not printing." << endl;
     }
 }
 
 void zeroOut(Packet* p)
 {
-  p -> type = 0;
-  p -> filename = 0;
-  p -> filename_length = 0;
-  
-  p -> mode = 0;
-  p -> mode_length = 0;
-  
-  p -> block_num[0] = 0;
-  p -> block_num[1] = 0;
-  p -> data = 0;
-  p -> data_length = 0;
-  
-  p -> errorcode[0] = 0;
-  p -> errorcode[1] = 0;
-  p -> errmsg = 0;
-  p -> errmsg_length = 0; 
+  if(p != 0)
+    {
+      p -> type = 0;
+      p -> filename = 0;
+      p -> filename_length = 0;
+      
+      p -> mode = 0;
+      p -> mode_length = 0;
+      
+      p -> block_num[0] = 0;
+      p -> block_num[1] = 0;
+      p -> data = 0;
+      p -> data_length = 0;
+      
+      p -> errorcode[0] = 0;
+      p -> errorcode[1] = 0;
+      p -> errmsg = 0;
+      p -> errmsg_length = 0; 
+
+    }
+  else { cout << "Null packet. Can't zero." << endl; }
 }
 
 void getFilename(char* data, int length, Packet* p)
@@ -92,9 +120,8 @@ void getFilename(char* data, int length, Packet* p)
   
   p -> filename = fname;  
   p -> filename_length = current_length;
+ 
 
-  cout << "fname: " << fname << endl;
-  cout << "p->filename: " << p->filename << endl;
 }
 
 void getMode(char* data, int length, Packet* p)
@@ -188,8 +215,18 @@ Packet* parseTFTPPacket(char* data, int length)
   Packet* pack = new Packet();
   zeroOut(pack);
   
+  //cout << pack -> type << endl;
+  //cout << pack -> filename_length << endl;
+  
+
   //get opcode
   pack -> type = getType(data, length);
+
+  //cout << pack -> type << endl;
+  //cout << pack -> filename_length << endl;
+  //cout << pack -> filename << endl;
+  printPacket(pack);
+
   
   //if the opcode is incorrect/corrupted
   if(pack->type > 5 ||
@@ -204,9 +241,9 @@ Packet* parseTFTPPacket(char* data, int length)
      pack -> type == 2)
     {
       getFilename(data, length, pack);
-      cout << pack -> filename << endl;
       //getMode(data, length, pack);
     }
+  printPacket(pack);
   /*
   //if the packet is DATA
   if(pack -> type == 3)
@@ -220,8 +257,13 @@ Packet* parseTFTPPacket(char* data, int length)
     {
       getBlockNum(data, length, pack);
     }
-
+  
   //if the packet is an ERROR
+  if(pack -> type == 5)
+    {
+      getErrorCode(data, length, pack);
+      getErrorMessage(data, length, pack);
+    }
   */
   return pack;
 }
