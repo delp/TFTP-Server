@@ -207,7 +207,10 @@ void getErrorMessage(char* data, int length, Packet* p)
       msg[i - 4] = data[i];
     }
   p -> errmsg = msg;
-  p -> errmsg_length = length - 4;
+  p -> errmsg_length = length - 5;  //This is minus 5
+  //and not minus 4 because the length of the error
+  //message should not include the terminating 0 character
+  //at the end of the string
 }
 
 Packet* parseTFTPPacket(char* data, int length)

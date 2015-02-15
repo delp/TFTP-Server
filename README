@@ -1,1 +1,4 @@
 A TFTP server written in C++. Packets. Packets everywhere.
+
+This is my first attempt at writing an application working only from an RFC specification. (RFC 1350)
+
