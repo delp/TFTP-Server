@@ -44,13 +44,15 @@ void printPacket(Packet* p)
 	  cout << "Mode: "        << p->mode            << endl;
 	}
       cout << "Mode_length: "     << p-> mode_length    << endl;
-      cout << "Block_Num: "       << p->block_num       << endl;
+      cout << "Block_Num: "       << p->block_num[0] << p->block_num[1]
+	                                              << endl;
       if(p->data != 0)
 	{
 	  cout << "Data: "        << p->data            << endl;
 	}
       cout << "Data_length: "     << p->data_length     << endl;
-      cout << "Errorcode: "       << p->errorcode       << endl;
+      cout << "Errorcode: "       << p->errorcode[0] << p->errorcode[1]
+	                                               << endl;
       if(p->errmsg != 0)
 	{
 	  cout << "ErrMessage: "  << p->errmsg          << endl;
@@ -93,7 +95,7 @@ void zeroOut(Packet* p)
 void getFilename(char* data, int length, Packet* p)
 {  
   //initialize an index to walk through the datagram over the filename portion
-  char bufferthing[256];
+  char* bufferthing = new char[256];
   int walker = 2;
   int current_length = 0; //keep track of the length of the filename
   
@@ -110,7 +112,7 @@ void getFilename(char* data, int length, Packet* p)
     }
   
   
-  char fname[current_length];
+  char* fname = new char[current_length];
   for(int i = 0; i < current_length; i++)
     {
       fname[i] = bufferthing[i];
@@ -120,16 +122,15 @@ void getFilename(char* data, int length, Packet* p)
   
   p -> filename = fname;  
   p -> filename_length = current_length;
- 
 
 }
 
 void getMode(char* data, int length, Packet* p)
 {
-  char bufferthing[30];
+  char* bufferthing = new char[30];
   int walker = 2;
   //skim past the filename;
-  while(walker != (char) 0)
+  while(data[walker] != (char) 0)
     {
       walker++;
     }
@@ -143,10 +144,11 @@ void getMode(char* data, int length, Packet* p)
       bufferthing[bufferIndex] = data[walker];
       current_length++;
       walker++;
+      bufferIndex++;
       current_byte = data[walker];
     }
 
-  char modename[current_length];
+  char* modename = new char[current_length];
   for(int i = 0; i < current_length; i++)
     {
       modename[i] = bufferthing[i];
@@ -182,7 +184,7 @@ void getBlockNum(char* data, int length, Packet* p)
 
 void getData(char* data, int length, Packet* p)
 {
-  char datagram[length - 4];
+  char* datagram = new char[length - 4];
   for(int i = 4; i < length; i++)
     {
       datagram[i-4] = data[i];
@@ -199,7 +201,7 @@ void getErrorCode(char* data, int length, Packet* p)
 
 void getErrorMessage(char* data, int length, Packet* p)
 {
-  char msg[length - 4];
+  char* msg = new char[length - 4];
   for(int i = 4; i < (length - 1); i++)
     {
       msg[i - 4] = data[i];
@@ -215,19 +217,9 @@ Packet* parseTFTPPacket(char* data, int length)
   Packet* pack = new Packet();
   zeroOut(pack);
   
-  //cout << pack -> type << endl;
-  //cout << pack -> filename_length << endl;
-  
-
   //get opcode
   pack -> type = getType(data, length);
 
-  //cout << pack -> type << endl;
-  //cout << pack -> filename_length << endl;
-  //cout << pack -> filename << endl;
-  printPacket(pack);
-
-  
   //if the opcode is incorrect/corrupted
   if(pack->type > 5 ||
      pack->type < 1)
@@ -241,17 +233,17 @@ Packet* parseTFTPPacket(char* data, int length)
      pack -> type == 2)
     {
       getFilename(data, length, pack);
-      //getMode(data, length, pack);
+      getMode(data, length, pack);
     }
-  printPacket(pack);
-  /*
+ 
+  
   //if the packet is DATA
   if(pack -> type == 3)
     {
       getBlockNum(data, length, pack);
       getData(data, length, pack);
     }
-
+  
   //if the packet is an ACK
   if(pack -> type == 4)
     {
@@ -264,7 +256,7 @@ Packet* parseTFTPPacket(char* data, int length)
       getErrorCode(data, length, pack);
       getErrorMessage(data, length, pack);
     }
-  */
+  
   return pack;
 }
 
