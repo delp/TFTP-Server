@@ -1,2 +1,2 @@
 default:
-	g++ TFTP-Server.cpp -o server.cpp;
+	g++ TFTP-Server.cpp Server.h Server.cpp -o server.cpp;

@@ -8,7 +8,10 @@
 
 #include <iostream>
 #include "parseTFTPPacket.h"
+#include "Server.h"
 using namespace std;
+
+int serverPort = 51509;
 
 void testPacket() {
 	  Packet* readPack;
@@ -57,6 +60,16 @@ void testPacket() {
 int main() {
 	cout << "ayyy lmao" << endl; // prints !!!Hello World!!!
 	testPacket();
+
+	//Create the server, and exit if socket creation fails
+	Server* server = new Server(serverPort);
+	server->bindSocket();
+
+	server->getSizeAndListen();
+	server->acceptClient();
+	server->serveClient();
+	server->closeSocket();
+
 	return 0;
 
 
